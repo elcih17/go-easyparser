@@ -8,9 +8,10 @@ import (
 	"path/filepath"
 	"reflect"
 
-	tstypes "github.com/go-generalize/go-easyparser/types"
 	"github.com/go-utils/gopackages"
 	"golang.org/x/tools/go/packages"
+
+	tstypes "github.com/go-generalize/go-easyparser/types"
 )
 
 // Parser is a Go module parser for TypeScript AST
@@ -315,6 +316,10 @@ func (p *pkgParser) parseInterface(_ *types.Interface) tstypes.Type {
 	return &tstypes.Any{}
 }
 
+func (p *pkgParser) parseAlias(u *types.Alias) tstypes.Type {
+	return p.parseType(u.Rhs(), true)
+}
+
 func (p *pkgParser) parseType(u types.Type, dep bool) tstypes.Type {
 	var typ tstypes.Type
 	if p.Replacer != nil {
@@ -342,6 +347,8 @@ func (p *pkgParser) parseType(u types.Type, dep bool) tstypes.Type {
 		typ = p.parseMap(u)
 	case *types.Interface:
 		typ = p.parseInterface(u)
+	case *types.Alias:
+		typ = p.parseAlias(u)
 	default:
 		panic("unsupported named type: " + reflect.TypeOf(u).String())
 	}
